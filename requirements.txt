@@ -1,0 +1,26 @@
+# ==========================================
+# audio2sub - 核心依赖清单
+# ==========================================
+
+# 1. 语音转写与推理引擎 (Faster-Whisper / CTranslate2)
+faster-whisper>=1.0.0
+ctranslate2>=4.0.0
+numpy>=1.22.0
+
+# 2. LLM 翻译服务 (OpenAI SDK 兼容 DeepSeek API)
+openai>=1.0.0
+
+# 3. Web 后端与 API 服务
+fastapi>=0.100.0
+uvicorn>=0.20.0
+pydantic>=2.0.0
+requests>=2.28.0
+
+# 4. 现代桌面端 GUI (PyWebView 客户端)
+pywebview>=5.0.0
+
+# ==========================================
+# 可选依赖 (NVIDIA GPU CUDA 12 运行支持)
+# ==========================================
+# 如果在 Windows + NVIDIA 显卡环境下遇到 cublas64_*.dll 缺失：
+# pip install nvidia-cublas-cu12
