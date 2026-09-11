@@ -48,8 +48,21 @@ venv.bak/
 # Output Files (keep .gitkeep only)
 output/*
 !output/.gitkeep
+tasks/*
+!tasks/.gitkeep
 *.lrc
 *.srt
+*.vtt
+
+# Offline Models & Cache
+models/
+openlrc/
+
+# Session Persona & Learning Backups
+_session_persona.json
+**/.backups/
+.backups/
+*.bak
 
 # Logs & Temporary files
 *.log

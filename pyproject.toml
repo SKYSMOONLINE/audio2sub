@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audio2sub"
+version = "0.2.0"
+description = "Agent-native Japanese ASMR subtitle workflow"
+requires-python = ">=3.10"
+dependencies = ["faster-whisper>=1.0.0", "ctranslate2>=4.0.0", "numpy>=1.22.0"]
+
+[tool.setuptools]
+py-modules = ["config"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["core*"]

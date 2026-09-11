@@ -1,0 +1,29 @@
+{
+  "description": "Regex patterns and blacklisted phrases used to detect and eliminate Whisper hallucinations and silence artifacts.",
+  "patterns": [
+    "ご視聴ありがとうございました",
+    "ご覧いただきありがとう",
+    "チャンネル登録",
+    "高評価.*お願い",
+    "お疲れ様でした.*次回",
+    "次回までお楽しみに",
+    "またご視聴下さい",
+    "Subtitles by",
+    "Translated by",
+    "bluetooth",
+    "赤ちゃん",
+    "猫は",
+    "犬[もは]",
+    "ママ「",
+    "娘「",
+    "娘『",
+    "パパ「",
+    "耳元で囁いています",
+    "これは音声作品",
+    "音声作品の台詞",
+    "お医者さん.*お母さん",
+    "あーお医者さん",
+    "あーおじいちゃん"
+  ],
+  "learned_hallucinations": []
+}

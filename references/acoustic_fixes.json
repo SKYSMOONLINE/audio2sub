@@ -1,0 +1,85 @@
+{
+  "description": "Phrase-level acoustic error correction rules. Rules MUST include local phonetic context to avoid false-positive substring replacement.",
+  "rules": [
+    {
+      "pattern": "お味噌の(ちんぽ|チンポ|おちんちん)",
+      "replacement": "おじさんの\\1",
+      "context_required": true,
+      "note": "Acoustic confusion: おじさん misheard as お味噌 when combined with penis terminology. Never replace naked お味噌."
+    },
+    {
+      "pattern": "仲良しされてる",
+      "replacement": "中出しされてる",
+      "context_required": true,
+      "note": "Acoustic confusion: なかだし misheard as なかよし in climax/sex contexts."
+    }
+  ],
+  "learned_fixes": [
+    {
+      "pattern": "お味噌の(精液|ザーメン)",
+      "replacement": "おじさんの\\1",
+      "note": "Acoustic mishearing for uncle in semen context",
+      "added_at": "2026-09-07T10:58:28.724849"
+    },
+    {
+      "pattern": "こういう歯の",
+      "replacement": "コユハの",
+      "note": "角色名小柚叶误听纠正",
+      "added_at": "2026-09-07T12:35:37.095023"
+    },
+    {
+      "pattern": "赤バン食らった",
+      "replacement": "垢バン食らった",
+      "note": "封号声学纠偏",
+      "added_at": "2026-09-07T12:35:55.489764"
+    },
+    {
+      "pattern": "なんか排毒的で",
+      "replacement": "なんか背徳的で",
+      "note": "背德感声学纠偏",
+      "added_at": "2026-09-07T12:35:57.514244"
+    },
+    {
+      "pattern": "写生して",
+      "replacement": "射精して",
+      "note": "射精声学纠偏",
+      "added_at": "2026-09-07T12:36:00.677954"
+    },
+    {
+      "pattern": "最初に前揮をして",
+      "replacement": "最初に前戯をして",
+      "note": "前戏术语纠正",
+      "added_at": "2026-09-07T15:26:27.162016"
+    },
+    {
+      "pattern": "手のひらで気筒なでなで",
+      "replacement": "手のひらで亀頭なでなで",
+      "note": "龟头声学纠偏",
+      "added_at": "2026-09-07T15:26:29.710276"
+    },
+    {
+      "pattern": "陶器(だけじゃなくて|を捨てる|を奪う|卒業)",
+      "replacement": "童貞\\1",
+      "note": "童贞在耳语弱音中误识为陶器纠正",
+      "added_at": "2026-09-07T23:15:00.000000"
+    },
+    {
+      "pattern": "(お兄さんの|私の|この)(クース|コース)で",
+      "replacement": "\\1ブースで",
+      "note": "漫咖包厢ブース声学误听纠正",
+      "added_at": "2026-09-07T23:15:00.000000"
+    },
+    {
+      "pattern": "めちゃめちゃの待機をふっかける",
+      "replacement": "めちゃめちゃな大金をふっかける",
+      "note": "大金をふっかける漫天要价误识纠正",
+      "added_at": "2026-09-07T23:15:00.000000"
+    },
+    {
+      "pattern": "ときつもーり",
+      "replacement": "ファーストキスもらい",
+      "note": "收下初吻耳语误识纠正",
+      "added_at": "2026-09-07T23:15:00.000000"
+    }
+  ]
+}

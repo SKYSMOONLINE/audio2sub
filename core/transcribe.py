@@ -8,14 +8,12 @@
 import sys
 from pathlib import Path
 
-import config  # noqa: F401  # 触发 cuBLAS PATH 注入与镜像设置
-
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from faster_whisper import WhisperModel  # noqa: E402
-from faster_whisper.audio import decode_audio  # noqa: E402
 from difflib import SequenceMatcher
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 # Whisper 模型需要文件：本地目录里必须含 model.bin + config.json + tokenizer.json
 _REQUIRED_FILES = ("model.bin", "config.json", "tokenizer.json")
@@ -48,6 +46,10 @@ def load_model(model_name: str, compute_type: str = "int8_float16", device: str 
     返回带 .device 标注的模型（faster-whisper 本身不暴露 device，这里补上便于日志/状态显示）。
     """
     _log = log if callable(log) else (lambda msg: None)
+    try:
+        from faster_whisper import WhisperModel
+    except ImportError as exc:
+        raise RuntimeError("ASR requires faster-whisper; install requirements.txt (no model download is performed)") from exc
     path = resolve_model_path(model_name)
     if device == "cpu":
         _log("按配置使用 CPU（int8）…")
@@ -78,6 +80,8 @@ def highpass_and_normalize(audio: np.ndarray, sr: int = 16000, cutoff: float = 8
     1. 65 阶 FIR 高通滤波（~80Hz）：滤除 ASMR 贴麦录音中 <80Hz 的气流喷麦与低频爆破轰鸣；
     2. 温和峰值自适应增益：适度抬升极微弱耳语与气声的电平，防止 Whisper 漏词。
     """
+    if np is None:
+        raise RuntimeError("ASR audio preprocessing requires numpy")
     if len(audio) < 65:
         return audio
     fc = cutoff / sr
@@ -164,6 +168,10 @@ def transcribe_audio(model, audio_path, language="ja", initial_prompt="",
     - split_stereo: 双人声/双耳立体声模式（分别独立解码左右耳并交错合并）
     """
     audio_path = str(audio_path)
+    try:
+        from faster_whisper.audio import decode_audio
+    except ImportError as exc:
+        raise RuntimeError("ASR requires faster-whisper audio decoder") from exc
     _log = progress_cb if callable(progress_cb) else (lambda msg: None)
     vad_params = vad_parameters if vad_parameters is not None else DEFAULT_VAD_PARAMS
 
@@ -181,25 +189,39 @@ def transcribe_audio(model, audio_path, language="ja", initial_prompt="",
             segs_l_raw, info_l = model.transcribe(
                 wav_l, language=None if language == "auto" else language,
                 beam_size=beam_size, initial_prompt=initial_prompt or None,
+                word_timestamps=True,
                 condition_on_previous_text=condition_on_previous_text,
                 vad_filter=vad_filter, vad_parameters=vad_params,
-                compression_ratio_threshold=2.2,
-                repetition_penalty=1.15,
-                no_repeat_ngram_size=4,
+                compression_ratio_threshold=2.4,
             )
-            segs_l = [(s.start, s.end, s.text.strip()) for s in segs_l_raw]
+            segs_l = [
+                (
+                    s.words[0].start if (hasattr(s, "words") and s.words) else s.start,
+                    s.words[-1].end if (hasattr(s, "words") and s.words) else s.end,
+                    s.text.strip()
+                )
+                for s in segs_l_raw
+                if getattr(s, "no_speech_prob", 0.0) <= 0.75 and s.text.strip()
+            ]
 
             _log("识别右耳声道中…")
             segs_r_raw, info_r = model.transcribe(
                 wav_r, language=None if language == "auto" else language,
                 beam_size=beam_size, initial_prompt=initial_prompt or None,
+                word_timestamps=True,
                 condition_on_previous_text=condition_on_previous_text,
                 vad_filter=vad_filter, vad_parameters=vad_params,
-                compression_ratio_threshold=2.2,
-                repetition_penalty=1.15,
-                no_repeat_ngram_size=4,
+                compression_ratio_threshold=2.4,
             )
-            segs_r = [(s.start, s.end, s.text.strip()) for s in segs_r_raw]
+            segs_r = [
+                (
+                    s.words[0].start if (hasattr(s, "words") and s.words) else s.start,
+                    s.words[-1].end if (hasattr(s, "words") and s.words) else s.end,
+                    s.text.strip()
+                )
+                for s in segs_r_raw
+                if getattr(s, "no_speech_prob", 0.0) <= 0.75 and s.text.strip()
+            ]
 
             _log("合并双耳声道台词（交错对齐与去重）…")
             segs = merge_stereo_segments(segs_l, segs_r)
@@ -220,17 +242,23 @@ def transcribe_audio(model, audio_path, language="ja", initial_prompt="",
         input_data,
         language=None if language == "auto" else language,
         beam_size=beam_size,
+        word_timestamps=True,
         initial_prompt=initial_prompt or None,
         condition_on_previous_text=condition_on_previous_text,
         vad_filter=vad_filter,
         vad_parameters=vad_params,
-        compression_ratio_threshold=2.2,
-        repetition_penalty=1.15,
-        no_repeat_ngram_size=4,
+        compression_ratio_threshold=2.4,
     )
     segs = []
-    for seg in segments:
-        segs.append((seg.start, seg.end, seg.text.strip()))
+    for s in segments:
+        if getattr(s, "no_speech_prob", 0.0) > 0.75:
+            continue
+        txt = s.text.strip()
+        if not txt:
+            continue
+        start = s.words[0].start if (hasattr(s, "words") and s.words) else s.start
+        end = s.words[-1].end if (hasattr(s, "words") and s.words) else s.end
+        segs.append((start, end, txt))
     lang = getattr(info, "language", language)
     prob = getattr(info, "language_probability", 0)
     _log(f"识别完成：语言 {lang}（置信度 {prob:.2f}），{len(segs)} 个片段")
